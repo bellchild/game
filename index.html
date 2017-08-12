@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Game</title>
+</head>
+<style>
+    canvas {
+        border: 1px solid black;
+    }
+</style>
+
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <div>
+        <div style="font-size: 20px;">
+            时间：
+            <span id="time">1</span>
+        </div>
+        <div style="font-size: 20px;">
+            当前子弹数：
+            <span id="num"></span>
+        </div>
+    </div>
+</body>
+<script>
+    var log = console.log.bind(console)
+    var bgWidth = 800
+    var bgHeight = 600
+    var fps = 60  // 刷新率
+    var x = 100
+    var y = 100
+    var upKeyDown, downKeyDown, leftKeyDown, rightKeyDown
+    var speed = 10
+    var imgWidth
+    var imgHeight
+
+    // 子弹配置
+    var bullets = []
+    var b_speed = 3
+
+
+    var ctx = document.querySelector('#canvas').getContext('2d')
+    var img = new Image()
+    img.src = 'a.png'
+    img.onload = function () {
+        ctx.drawImage(img, x, y)
+        imgWidth = this.width
+        imgHeight = this.height
+    }
+
+    window.addEventListener('keydown', function (event) {
+        var k = event.key
+        switch (k) {
+            case 'ArrowUp':
+                upKeyDown = true
+                break
+            case 'ArrowDown':
+                downKeyDown = true
+                break
+            case 'ArrowLeft':
+                leftKeyDown = true
+                break
+            case 'ArrowRight':
+                rightKeyDown = true
+                break
+        }
+    })
+
+    window.addEventListener('keyup', function (event) {
+        var k = event.key
+        switch (k) {
+            case 'ArrowUp':
+                upKeyDown = false
+                break
+            case 'ArrowDown':
+                downKeyDown = false
+                break
+            case 'ArrowLeft':
+                leftKeyDown = false
+                break
+            case 'ArrowRight':
+                rightKeyDown = false
+                break
+            case ' ':
+                createBullet()
+                break
+        }
+    })
+
+    var canvas_auto_refresh = setInterval(function () {
+        if (upKeyDown)
+            y -= speed
+        if (downKeyDown)
+            y += speed
+        if (leftKeyDown)
+            x -= speed
+        if (rightKeyDown)
+            x += speed
+
+        if (x < 0)
+            x = 0
+        if (y < 0)
+            y = 0
+        if (x > bgWidth - imgWidth)
+            x = bgWidth - imgWidth
+        if (y > bgHeight - imgHeight)
+            y = bgHeight - imgHeight
+
+        ctx.clearRect(0, 0, bgWidth, bgHeight)  // 重绘画布
+        ctx.drawImage(img, x, y)
+
+        if (bullets.length > 0) {
+            // 这里其实是一个多路复用
+            bullets.forEach(function (bullet) {
+                var b_x = bullet.b_x
+                var b_y = bullet.b_y
+                var b_width = bullet.b_width
+                var b_height = bullet.b_height
+                var move_left = bullet.move_left
+                var move_right = bullet.move_right
+
+                // 到了边界就折返
+                if (b_x < 0 || b_x > bgWidth - b_width)
+                    move_left = !move_left
+                if (b_y < 0 || b_y > bgHeight - b_height)
+                    move_right = !move_right
+
+                if (move_left)
+                    b_x -= b_speed
+                else
+                    b_x += b_speed
+                if (move_right)
+                    b_y -= b_speed
+                else
+                    b_y += b_speed
+
+                ctx.drawImage(bullet, b_x, b_y)
+
+                bullet.move_left = move_left
+                bullet.move_right = move_right
+                bullet.b_x = b_x
+                bullet.b_y = b_y
+
+                // 如果接触了
+                if ((!(b_x + b_width < x || b_x > x + imgWidth)) && (!(b_y + b_height < y || b_y > y + imgHeight))) {
+                    clearInterval(canvas_auto_refresh)
+                    clearInterval(time_record)
+                    img.src = '111.png'
+                }
+            });
+        }
+    }, 1000 / fps)
+
+    function createBullet() {
+        var bullet = new Image()
+        bullet.src = 'bullet.png'
+
+        bullet.onload = function () {
+            var b_width = this.width
+            var b_height = this.height
+
+            var b_x = Math.random() * (bgWidth - b_width)
+            var b_y = Math.random() * (bgHeight - b_height)
+
+            var move_left = Math.random() >= 0.5  // 水平方向移动方式
+            var move_up = Math.random() >= 0.5  // 竖直方向移动方式
+
+            bullet.move_left = move_left
+            bullet.move_up = move_up
+            bullet.b_x = b_x
+            bullet.b_y = b_y
+            bullet.b_width = b_width
+            bullet.b_height = b_height
+
+            bullets.push(bullet)
+
+            document.querySelector('#num').innerHTML = bullets.length
+        }
+    }
+
+    // 默认有一个子弹
+    createBullet()
+
+</script>
+<script>
+    var time_record = setInterval(function () {
+        var time = document.querySelector('#time').innerHTML
+        document.querySelector('#time').innerHTML = parseInt(time) + 1
+    }, 1000)
+
+</script>
+
+</html>
