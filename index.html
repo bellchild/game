@@ -24,6 +24,9 @@
             当前子弹数：
             <span id="num"></span>
         </div>
+        <div>
+            <video src="boom.mp3" id="boom"></video>
+        </div>
     </div>
 </body>
 <script>
@@ -150,6 +153,7 @@
                     clearInterval(canvas_auto_refresh)
                     clearInterval(time_record)
                     img.src = '111.png'
+                    document.querySelector('#boom').play()
                 }
             });
         }
