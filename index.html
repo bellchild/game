@@ -152,7 +152,7 @@
                 bullet.b_y = b_y
 
                 // 如果接触了
-                if ((!(b_x + b_width < x || b_x > x + imgWidth)) && (!(b_y + b_height < y || b_y > y + imgHeight))) {
+                if ((!(b_x + b_width < x || b_x > x + imgWidth)) && (!(b_y + b_height < y || b_y > y + imgHeight)) && imgWidth && imgHeight) {
                     clearInterval(canvas_auto_refresh)
                     clearInterval(time_record)
                     img.src = '111.png'
